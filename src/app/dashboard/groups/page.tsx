@@ -204,6 +204,7 @@ import {
   //   arrayUnion,
   setDoc,
   Timestamp,
+  FieldValue,
 } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { db, storage } from "@/lib/firebase"; // Adjust path to match your firebase setup
@@ -222,11 +223,11 @@ import {
   X,
 } from "lucide-react";
 
-interface GroupEvent {
-  title: string;
-  date: Timestamp;
-  groupId: string;
-}
+// interface GroupEvent {
+//   title: string;
+//   date: Timestamp;
+//   groupId: string;
+// }
 
 interface Message {
   id: string;
@@ -237,7 +238,7 @@ interface Message {
   fileURL?: string;
   fileType?: string;
   fileName?: string;
-  timestamp: string | Date;
+  timestamp: string | Date | FieldValue;
 }
 
 interface Group {
@@ -591,10 +592,10 @@ export default function Groups() {
       }
 
       // Create message object with only defined fields
-      const messageData: any = {
+      const messageData: Partial<Message> = {
         groupId: selectedGroup.id,
         senderId: currentUser.uid,
-        senderName: currentUser.displayName || currentUser.email,
+        senderName: currentUser.displayName || currentUser.email || "Unknown User",
         text: message.trim(),
         timestamp: serverTimestamp(),
       };
@@ -615,7 +616,7 @@ export default function Groups() {
         id: docRef.id,
         groupId: selectedGroup.id,
         senderId: currentUser.uid,
-        senderName: currentUser.displayName || currentUser.email,
+        senderName: currentUser.displayName || currentUser.email || "Unknown User",
         text: message.trim(),
         fileURL,
         fileType,
@@ -629,7 +630,11 @@ export default function Groups() {
       setUploading(false);
     } catch (error) {
       console.error("Error sending message:", error);
-      alert(`Failed to send message: ${error.message}`);
+      if (error instanceof Error) {
+        alert(`Failed to send message: ${error.message}`);
+      } else {
+        alert("Failed to send message: An unknown error occurred.");
+      }
       setUploading(false);
     }
   };
@@ -827,7 +832,11 @@ export default function Groups() {
       console.log("Updated myGroups:", [...myGroups, newMyGroup]);
     } catch (error) {
       console.error("Error joining group:", error);
-      alert(`Failed to join group: ${error.message}`);
+      if (error instanceof Error) {
+        alert(`Failed to join group: ${error.message}`);
+      } else {
+        alert("Failed to join group: An unknown error occurred.");
+      }
     }
   };
 
@@ -1118,7 +1127,7 @@ export default function Groups() {
               </div>
             ) : myGroups.length === 0 ? (
               <div className="p-8 text-center text-gray-500">
-                You haven't joined any groups yet. Discover groups below!
+                You haven&apos;t joined any groups yet. Discover groups below!
               </div>
             ) : (
               <div className="p-4 grid grid-cols-1 md:grid-cols-3 gap-4">

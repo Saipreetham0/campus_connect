@@ -102,21 +102,22 @@ export default function Projects() {
   const statuses = ["All", "Planning", "In Progress", "Review", "Completed"];
 
   // Function to determine color based on priority
-  const getPriorityColor = (priority) => {
-    switch (priority) {
-      case "High":
-        return "text-red-600 bg-red-50";
-      case "Medium":
-        return "text-amber-600 bg-amber-50";
-      case "Low":
-        return "text-green-600 bg-green-50";
-      default:
-        return "text-gray-600 bg-gray-50";
-    }
-  };
+interface PriorityColors {
+    [key: string]: string;
+}
+
+const getPriorityColor = (priority: string): string => {
+    const priorityColors: PriorityColors = {
+        High: "text-red-600 bg-red-50",
+        Medium: "text-amber-600 bg-amber-50",
+        Low: "text-green-600 bg-green-50",
+    };
+
+    return priorityColors[priority] || "text-gray-600 bg-gray-50";
+};
 
   // Function to determine color based on status
-  const getStatusColor = (status) => {
+  const getStatusColor = (status: string): string => {
     switch (status) {
       case "Planning":
         return "text-blue-600 bg-blue-50";
@@ -288,7 +289,7 @@ export default function Projects() {
           <div className="border-dashed border-2 border-gray-300 rounded-lg p-6 text-center">
             <p className="text-gray-500 mb-2">No archived projects yet</p>
             <p className="text-sm text-gray-400">
-              Completed projects will appear here after they're archived
+              Completed projects will appear here after they&apos;re archived
             </p>
           </div>
         </div>

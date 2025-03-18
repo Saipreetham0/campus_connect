@@ -366,7 +366,7 @@ export default function Events() {
     }
 
     try {
-      const eventRef = doc(db, "events", eventId);
+    //   const eventRef = doc(db, "events", eventId);
       const eventDoc = await getDocs(
         query(
           collection(db, "eventAttendees"),

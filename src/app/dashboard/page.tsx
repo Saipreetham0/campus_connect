@@ -691,15 +691,6 @@ interface Event {
   description: string;
 }
 
-interface NewEventForm {
-  title: string;
-  date: string;
-  time: string;
-  location: string;
-  organizer: string;
-  category: string;
-  description: string;
-}
 
 export default function Dashboard() {
   const { currentUser } = useAuth();
@@ -713,17 +704,9 @@ export default function Dashboard() {
   const [eventsLoading, setEventsLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [searchTerm, setSearchTerm] = useState("");
-  const [dateFilter, setDateFilter] = useState("");
-  const [showModal, setShowModal] = useState(false);
-  const [newEvent, setNewEvent] = useState<NewEventForm>({
-    title: "",
-    date: "",
-    time: "",
-    location: "",
-    organizer: "",
-    category: "Social",
-    description: "",
-  });
+  const [dateFilter] = useState("");
+//   const [showModal, setShowModal] = useState(false);
+  // Removed unused newEvent state
 
   const categories = [
     "All",
