@@ -1,60 +1,9 @@
-// "use client";
-
-// import { useAuth } from "@/context/AuthContext";
-// import { useRouter } from "next/navigation";
-// import { useEffect } from "react";
-
-// export default function Dashboard() {
-//   const { user, loading, logout } = useAuth();
-//   const router = useRouter();
-
-//   useEffect(() => {
-//     if (!loading && !user) {
-//       router.push("/login");
-//     }
-//   }, [user, loading, router]);
-
-//   const handleLogout = async () => {
-//     try {
-//       await logout();
-//       router.push("/login");
-//     } catch (error) {
-//       console.error("Failed to log out", error);
-//     }
-//   };
-
-//   if (loading) {
-//     return (
-//       <div className="flex min-h-screen items-center justify-center">
-//         Loading...
-//       </div>
-//     );
-//   }
-
-//   return (
-//     <div className="min-h-screen p-8">
-//       <div className="max-w-md mx-auto bg-white rounded-lg shadow-md p-8">
-//         <h1 className="text-2xl font-bold mb-6">Dashboard</h1>
-//         {user && (
-//           <>
-//             <p className="mb-4">Welcome, {user.email}</p>
-//             <p className="mb-4">User ID: {user.uid}</p>
-//             <button
-//               onClick={handleLogout}
-//               className="py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
-//             >
-//               Log Out
-//             </button>
-//           </>
-//         )}
-//       </div>
-//     </div>
-//   );
-// }
-
 "use client";
 
+import { useState, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
+import { db } from "@/lib/firebase";
+import { doc, getDoc } from "firebase/firestore";
 import {
   Calendar,
   Users,
@@ -62,11 +11,51 @@ import {
   BellRing,
   TrendingUp,
   Clock,
-//   AlertCircle,
+  User,
+  School,
+  BookOpen,
+  GraduationCap,
 } from "lucide-react";
 
 export default function Dashboard() {
-  const { user } = useAuth();
+  const { currentUser } = useAuth();
+
+  interface StudentProfile {
+    firstName: string;
+    lastName: string;
+    studentId: string;
+    college?: {
+      name: string;
+      department: string;
+      year: number;
+    };
+  }
+
+  const [studentProfile, setStudentProfile] = useState<StudentProfile | null>(
+    null
+  );
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchStudentProfile = async () => {
+      if (currentUser) {
+        try {
+          const studentDocRef = doc(db, "students", currentUser.uid);
+          const studentDoc = await getDoc(studentDocRef);
+
+          if (studentDoc.exists()) {
+            setStudentProfile(studentDoc.data() as StudentProfile);
+          }
+        } catch (error) {
+          console.error("Error fetching student profile:", error);
+        } finally {
+          setLoading(false);
+        }
+      }
+    };
+
+    fetchStudentProfile();
+  }, [currentUser]);
 
   const upcomingEvents = [
     {
@@ -141,14 +130,72 @@ export default function Dashboard() {
   ];
 
   return (
-    <div className="max-w-7xl mx-auto">
+    <div className="max-w-7xl mx-auto p-4">
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-gray-800">
-          Welcome back, {user?.email?.split("@")[0] || "User"}!
+          Welcome back,{" "}
+          {studentProfile?.firstName ||
+            currentUser?.email?.split("@")[0] ||
+            "User"}
+          !
         </h1>
         <p className="text-gray-600">
           Here&apos;s what&apos;s happening on campus today.
         </p>
+      </div>
+
+      {/* Student Profile */}
+      <div className="bg-white rounded-lg shadow mb-6">
+        <div className="p-4 border-b">
+          <h2 className="text-lg font-semibold">Student Profile</h2>
+        </div>
+        <div className="p-4">
+          {loading ? (
+            <p>Loading profile...</p>
+          ) : studentProfile ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <div className="flex items-center mb-4">
+                  <User className="w-5 h-5 text-gray-500 mr-2" />
+                  <div>
+                    <p className="text-sm text-gray-500">Name</p>
+                    <p className="font-medium">{`${studentProfile.firstName} ${studentProfile.lastName}`}</p>
+                  </div>
+                </div>
+                <div className="flex items-center mb-4">
+                  <BookOpen className="w-5 h-5 text-gray-500 mr-2" />
+                  <div>
+                    <p className="text-sm text-gray-500">Student ID</p>
+                    <p className="font-medium">{studentProfile.studentId}</p>
+                  </div>
+                </div>
+              </div>
+              <div>
+                <div className="flex items-center mb-4">
+                  <School className="w-5 h-5 text-gray-500 mr-2" />
+                  <div>
+                    <p className="text-sm text-gray-500">College</p>
+                    <p className="font-medium">
+                      {studentProfile.college?.name}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center mb-4">
+                  <GraduationCap className="w-5 h-5 text-gray-500 mr-2" />
+                  <div>
+                    <p className="text-sm text-gray-500">Department & Year</p>
+                    <p className="font-medium">
+                      {studentProfile.college?.department} (Year{" "}
+                      {studentProfile.college?.year})
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <p className="text-gray-500">No profile information available.</p>
+          )}
+        </div>
       </div>
 
       {/* Stats Grid */}
