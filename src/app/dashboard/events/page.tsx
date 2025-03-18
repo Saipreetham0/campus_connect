@@ -185,15 +185,32 @@
 //   );
 // }
 
+"use client";
 
-'use client';
-
-import { useState, useEffect } from 'react';
-import { Calendar, MapPin, Clock, Filter, ArrowUpDown, Plus, X, Loader2, LogIn } from 'lucide-react';
-import { collection, addDoc, getDocs, deleteDoc, doc, query, orderBy, where } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
-import { useAuth } from '@/context/AuthContext';
-import Link from 'next/link';
+import { useState, useEffect } from "react";
+import {
+  Calendar,
+  MapPin,
+  Clock,
+  //   Filter,
+  ArrowUpDown,
+  Plus,
+  X,
+  Loader2,
+} from "lucide-react";
+import {
+  collection,
+  addDoc,
+  getDocs,
+  deleteDoc,
+  doc,
+  query,
+  orderBy,
+  where,
+} from "firebase/firestore";
+import { db } from "@/lib/firebase";
+import { useAuth } from "@/context/AuthContext";
+// import Link from 'next/link';
 
 interface Event {
   id: string;
@@ -225,40 +242,50 @@ export default function Events() {
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState('All');
-  const [searchTerm, setSearchTerm] = useState('');
-  const [dateFilter, setDateFilter] = useState('');
-  const { currentUser, } = useAuth();
+  const [selectedCategory, setSelectedCategory] = useState("All");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [dateFilter, setDateFilter] = useState("");
+  const { currentUser } = useAuth();
 
   // Form state
   const [newEvent, setNewEvent] = useState<NewEventForm>({
-    title: '',
-    date: '',
-    time: '',
-    location: '',
-    organizer: '',
-    category: 'Social',
-    description: ''
+    title: "",
+    date: "",
+    time: "",
+    location: "",
+    organizer: "",
+    category: "Social",
+    description: "",
   });
 
-  const categories = ['All', 'Workshop', 'Career', 'Academic', 'Volunteer', 'Sports', 'Social', 'Birthday', 'Cultural'];
+  const categories = [
+    "All",
+    "Workshop",
+    "Career",
+    "Academic",
+    "Volunteer",
+    "Sports",
+    "Social",
+    "Birthday",
+    "Cultural",
+  ];
 
   // Load events from Firebase
   const fetchEvents = async () => {
     setLoading(true);
     try {
-      let eventsQuery = query(collection(db, 'events'), orderBy('date', 'asc'));
+      let eventsQuery = query(collection(db, "events"), orderBy("date", "asc"));
 
       // Apply date filter if it exists
       if (dateFilter) {
-        eventsQuery = query(eventsQuery, where('date', '==', dateFilter));
+        eventsQuery = query(eventsQuery, where("date", "==", dateFilter));
       }
 
       const querySnapshot = await getDocs(eventsQuery);
 
-      const eventsData = querySnapshot.docs.map(doc => ({
+      const eventsData = querySnapshot.docs.map((doc) => ({
         id: doc.id,
-        ...doc.data()
+        ...doc.data(),
       })) as Event[];
 
       setEvents(eventsData);
@@ -285,24 +312,27 @@ export default function Events() {
 
     try {
       setLoading(true);
-      await addDoc(collection(db, 'events'), {
+      await addDoc(collection(db, "events"), {
         ...newEvent,
         createdBy: currentUser.uid,
-        creatorName: currentUser.displayName || currentUser.email?.split('@')[0] || "Anonymous",
+        creatorName:
+          currentUser.displayName ||
+          currentUser.email?.split("@")[0] ||
+          "Anonymous",
         creatorEmail: currentUser.email,
         createdAt: new Date(),
-        attendees: 0
+        attendees: 0,
       });
 
       setShowModal(false);
       setNewEvent({
-        title: '',
-        date: '',
-        time: '',
-        location: '',
-        organizer: '',
-        category: 'Social',
-        description: ''
+        title: "",
+        date: "",
+        time: "",
+        location: "",
+        organizer: "",
+        category: "Social",
+        description: "",
       });
 
       fetchEvents();
@@ -320,7 +350,7 @@ export default function Events() {
 
     if (confirm("Are you sure you want to delete this event?")) {
       try {
-        await deleteDoc(doc(db, 'events', eventId));
+        await deleteDoc(doc(db, "events", eventId));
         fetchEvents();
       } catch (error) {
         console.error("Error deleting event: ", error);
@@ -336,10 +366,14 @@ export default function Events() {
     }
 
     try {
-      const eventRef = doc(db, 'events', eventId);
-      const eventDoc = await getDocs(query(collection(db, 'eventAttendees'),
-                                         where('eventId', '==', eventId),
-                                         where('userId', '==', currentUser.uid)));
+      const eventRef = doc(db, "events", eventId);
+      const eventDoc = await getDocs(
+        query(
+          collection(db, "eventAttendees"),
+          where("eventId", "==", eventId),
+          where("userId", "==", currentUser.uid)
+        )
+      );
 
       if (!eventDoc.empty) {
         alert("You have already joined this event!");
@@ -347,19 +381,22 @@ export default function Events() {
       }
 
       // Add user to attendees subcollection
-      await addDoc(collection(db, 'eventAttendees'), {
+      await addDoc(collection(db, "eventAttendees"), {
         eventId,
         userId: currentUser.uid,
-        userName: currentUser.displayName || currentUser.email?.split('@')[0] || "Anonymous",
-        joinedAt: new Date()
+        userName:
+          currentUser.displayName ||
+          currentUser.email?.split("@")[0] ||
+          "Anonymous",
+        joinedAt: new Date(),
       });
 
       // Update the attendee count
-      const eventToUpdate = events.find(event => event.id === eventId);
+      const eventToUpdate = events.find((event) => event.id === eventId);
       if (eventToUpdate) {
-        await addDoc(collection(db, 'events'), {
+        await addDoc(collection(db, "events"), {
           ...eventToUpdate,
-          attendees: (eventToUpdate.attendees || 0) + 1
+          attendees: (eventToUpdate.attendees || 0) + 1,
         });
       }
 
@@ -370,11 +407,13 @@ export default function Events() {
   };
 
   // Filter events by category and search term
-  const filteredEvents = events.filter(event => {
-    const matchesCategory = selectedCategory === 'All' || event.category === selectedCategory;
-    const matchesSearch = event.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         event.location?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         event.organizer?.toLowerCase().includes(searchTerm.toLowerCase());
+  const filteredEvents = events.filter((event) => {
+    const matchesCategory =
+      selectedCategory === "All" || event.category === selectedCategory;
+    const matchesSearch =
+      event.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      event.location?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      event.organizer?.toLowerCase().includes(searchTerm.toLowerCase());
     return matchesCategory && matchesSearch;
   });
 
@@ -384,7 +423,9 @@ export default function Events() {
       <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4">
         <div>
           <h1 className="text-2xl font-bold text-gray-800">Campus Events</h1>
-          <p className="text-gray-600">Discover and join events happening across campus</p>
+          <p className="text-gray-600">
+            Discover and join events happening across campus
+          </p>
         </div>
         <div className="flex gap-2">
           {/* {!currentUser ? (
@@ -408,7 +449,11 @@ export default function Events() {
             </div>
           )} */}
           <button
-            onClick={() => currentUser ? setShowModal(true) : alert("Please sign in to create events")}
+            onClick={() =>
+              currentUser
+                ? setShowModal(true)
+                : alert("Please sign in to create events")
+            }
             className="bg-indigo-600 text-white px-4 py-2 rounded-lg flex items-center"
           >
             <Plus className="w-5 h-5 mr-2" />
@@ -450,8 +495,8 @@ export default function Events() {
                 key={category}
                 className={`px-3 py-1 rounded-full text-sm ${
                   category === selectedCategory
-                    ? 'bg-indigo-100 text-indigo-700'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    ? "bg-indigo-100 text-indigo-700"
+                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                 }`}
                 onClick={() => setSelectedCategory(category)}
               >
@@ -469,8 +514,9 @@ export default function Events() {
           <button
             className="text-sm text-gray-600 hover:text-gray-800 flex items-center"
             onClick={() => {
-              const sortedEvents = [...events].sort((a, b) =>
-                new Date(a.date).getTime() - new Date(b.date).getTime()
+              const sortedEvents = [...events].sort(
+                (a, b) =>
+                  new Date(a.date).getTime() - new Date(b.date).getTime()
               );
               setEvents(sortedEvents);
             }}
@@ -486,7 +532,9 @@ export default function Events() {
           </div>
         ) : filteredEvents.length === 0 ? (
           <div className="text-center p-12 text-gray-500">
-            <p>No events found. Try adjusting your filters or create a new event.</p>
+            <p>
+              No events found. Try adjusting your filters or create a new event.
+            </p>
           </div>
         ) : (
           <div className="divide-y">
@@ -495,7 +543,9 @@ export default function Events() {
                 <div className="flex flex-col md:flex-row md:items-start gap-4">
                   <div className="bg-indigo-50 rounded-lg p-3 text-center min-w-24">
                     <p className="text-sm text-indigo-700 font-medium">
-                      {new Date(event.date).toLocaleDateString('en-US', { weekday: 'short' })}
+                      {new Date(event.date).toLocaleDateString("en-US", {
+                        weekday: "short",
+                      })}
                     </p>
                     <p className="text-lg font-bold text-indigo-800">
                       {new Date(event.date).getDate()}
@@ -504,7 +554,9 @@ export default function Events() {
 
                   <div className="flex-grow">
                     <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2">
-                      <h3 className="text-lg font-semibold text-gray-800">{event.title}</h3>
+                      <h3 className="text-lg font-semibold text-gray-800">
+                        {event.title}
+                      </h3>
                       <span className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-xs font-medium">
                         {event.category}
                       </span>
@@ -522,18 +574,29 @@ export default function Events() {
                     </div>
 
                     {event.description && (
-                      <p className="mt-2 text-sm text-gray-600">{event.description}</p>
+                      <p className="mt-2 text-sm text-gray-600">
+                        {event.description}
+                      </p>
                     )}
 
                     <div className="mt-3 flex items-center justify-between">
-                      <p className="text-sm text-gray-500">Organized by {event.organizer}</p>
+                      <p className="text-sm text-gray-500">
+                        Organized by {event.organizer}
+                      </p>
                       <div className="flex items-center">
                         <div className="flex -space-x-2 mr-2">
-                          {[...Array(Math.min(3, event.attendees || 0))].map((_, i) => (
-                            <div key={i} className="w-6 h-6 rounded-full bg-gray-300 border-2 border-white" />
-                          ))}
+                          {[...Array(Math.min(3, event.attendees || 0))].map(
+                            (_, i) => (
+                              <div
+                                key={i}
+                                className="w-6 h-6 rounded-full bg-gray-300 border-2 border-white"
+                              />
+                            )
+                          )}
                         </div>
-                        <p className="text-xs text-gray-500">{event.attendees || 0} attending</p>
+                        <p className="text-xs text-gray-500">
+                          {event.attendees || 0} attending
+                        </p>
                       </div>
                     </div>
                   </div>
@@ -569,7 +632,10 @@ export default function Events() {
           <div className="bg-white rounded-lg shadow-lg max-w-md w-full max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center p-4 border-b">
               <h3 className="text-lg font-semibold">Create New Event</h3>
-              <button onClick={() => setShowModal(false)} className="text-gray-500 hover:text-gray-700">
+              <button
+                onClick={() => setShowModal(false)}
+                className="text-gray-500 hover:text-gray-700"
+              >
                 <X className="w-5 h-5" />
               </button>
             </div>
@@ -584,7 +650,9 @@ export default function Events() {
                   required
                   className="w-full p-2 border rounded-lg"
                   value={newEvent.title}
-                  onChange={(e) => setNewEvent({...newEvent, title: e.target.value})}
+                  onChange={(e) =>
+                    setNewEvent({ ...newEvent, title: e.target.value })
+                  }
                 />
               </div>
 
@@ -598,7 +666,9 @@ export default function Events() {
                     required
                     className="w-full p-2 border rounded-lg"
                     value={newEvent.date}
-                    onChange={(e) => setNewEvent({...newEvent, date: e.target.value})}
+                    onChange={(e) =>
+                      setNewEvent({ ...newEvent, date: e.target.value })
+                    }
                   />
                 </div>
 
@@ -612,7 +682,9 @@ export default function Events() {
                     placeholder="e.g. 3:00 PM - 5:00 PM"
                     className="w-full p-2 border rounded-lg"
                     value={newEvent.time}
-                    onChange={(e) => setNewEvent({...newEvent, time: e.target.value})}
+                    onChange={(e) =>
+                      setNewEvent({ ...newEvent, time: e.target.value })
+                    }
                   />
                 </div>
               </div>
@@ -626,7 +698,9 @@ export default function Events() {
                   required
                   className="w-full p-2 border rounded-lg"
                   value={newEvent.location}
-                  onChange={(e) => setNewEvent({...newEvent, location: e.target.value})}
+                  onChange={(e) =>
+                    setNewEvent({ ...newEvent, location: e.target.value })
+                  }
                 />
               </div>
 
@@ -639,7 +713,9 @@ export default function Events() {
                   required
                   className="w-full p-2 border rounded-lg"
                   value={newEvent.organizer}
-                  onChange={(e) => setNewEvent({...newEvent, organizer: e.target.value})}
+                  onChange={(e) =>
+                    setNewEvent({ ...newEvent, organizer: e.target.value })
+                  }
                 />
               </div>
 
@@ -650,11 +726,17 @@ export default function Events() {
                 <select
                   className="w-full p-2 border rounded-lg"
                   value={newEvent.category}
-                  onChange={(e) => setNewEvent({...newEvent, category: e.target.value})}
+                  onChange={(e) =>
+                    setNewEvent({ ...newEvent, category: e.target.value })
+                  }
                 >
-                  {categories.filter(c => c !== 'All').map(cat => (
-                    <option key={cat} value={cat}>{cat}</option>
-                  ))}
+                  {categories
+                    .filter((c) => c !== "All")
+                    .map((cat) => (
+                      <option key={cat} value={cat}>
+                        {cat}
+                      </option>
+                    ))}
                 </select>
               </div>
 
@@ -666,7 +748,9 @@ export default function Events() {
                   className="w-full p-2 border rounded-lg"
                   rows={3}
                   value={newEvent.description}
-                  onChange={(e) => setNewEvent({...newEvent, description: e.target.value})}
+                  onChange={(e) =>
+                    setNewEvent({ ...newEvent, description: e.target.value })
+                  }
                 />
               </div>
 
@@ -686,7 +770,7 @@ export default function Events() {
                   {loading ? (
                     <Loader2 className="w-5 h-5 animate-spin" />
                   ) : (
-                    'Create Event'
+                    "Create Event"
                   )}
                 </button>
               </div>

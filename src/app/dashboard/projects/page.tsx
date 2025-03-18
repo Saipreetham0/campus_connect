@@ -1,104 +1,133 @@
-'use client';
+"use client";
 
-import { FolderKanban, Clock, Users, Tag, Plus, CheckSquare, Archive, Search, Filter, ArrowUpDown } from 'lucide-react';
+import {
+  //   FolderKanban,
+  Clock,
+  Users,
+  //   Tag,
+  Plus,
+  CheckSquare,
+  Archive,
+  Search,
+  Filter,
+  ArrowUpDown,
+} from "lucide-react";
 
 export default function Projects() {
   const projects = [
     {
       id: 1,
-      name: 'Campus Mobile App',
-      description: 'Developing a mobile app for campus resources and events',
+      name: "Campus Mobile App",
+      description: "Developing a mobile app for campus resources and events",
       progress: 75,
-      status: 'In Progress',
-      dueDate: 'April 15, 2025',
+      status: "In Progress",
+      dueDate: "April 15, 2025",
       team: 6,
       tasks: { completed: 24, total: 32 },
-      category: 'Development',
-      priority: 'High'
+      category: "Development",
+      priority: "High",
     },
     {
       id: 2,
-      name: 'Research Symposium',
-      description: 'Organizing annual student research presentations',
+      name: "Research Symposium",
+      description: "Organizing annual student research presentations",
       progress: 40,
-      status: 'In Progress',
-      dueDate: 'May 10, 2025',
+      status: "In Progress",
+      dueDate: "May 10, 2025",
       team: 8,
       tasks: { completed: 12, total: 30 },
-      category: 'Event',
-      priority: 'Medium'
+      category: "Event",
+      priority: "Medium",
     },
     {
       id: 3,
-      name: 'Library Redesign',
-      description: 'Student-led initiative to redesign library study spaces',
+      name: "Library Redesign",
+      description: "Student-led initiative to redesign library study spaces",
       progress: 20,
-      status: 'Planning',
-      dueDate: 'June 30, 2025',
+      status: "Planning",
+      dueDate: "June 30, 2025",
       team: 5,
       tasks: { completed: 6, total: 28 },
-      category: 'Design',
-      priority: 'Medium'
+      category: "Design",
+      priority: "Medium",
     },
     {
       id: 4,
-      name: 'Sustainability Report',
-      description: 'Annual campus sustainability assessment and report',
+      name: "Sustainability Report",
+      description: "Annual campus sustainability assessment and report",
       progress: 90,
-      status: 'Review',
-      dueDate: 'March 31, 2025',
+      status: "Review",
+      dueDate: "March 31, 2025",
       team: 4,
       tasks: { completed: 18, total: 20 },
-      category: 'Research',
-      priority: 'High'
+      category: "Research",
+      priority: "High",
     },
     {
       id: 5,
-      name: 'Mentorship Program',
-      description: 'Connecting freshmen with upperclassmen mentors for academic guidance',
+      name: "Mentorship Program",
+      description:
+        "Connecting freshmen with upperclassmen mentors for academic guidance",
       progress: 60,
-      status: 'In Progress',
-      dueDate: 'April 20, 2025',
+      status: "In Progress",
+      dueDate: "April 20, 2025",
       team: 7,
       tasks: { completed: 15, total: 25 },
-      category: 'Community',
-      priority: 'Medium'
+      category: "Community",
+      priority: "Medium",
     },
     {
       id: 6,
-      name: 'Campus Tour VR Experience',
-      description: 'Creating a virtual reality campus tour for prospective students',
+      name: "Campus Tour VR Experience",
+      description:
+        "Creating a virtual reality campus tour for prospective students",
       progress: 30,
-      status: 'Planning',
-      dueDate: 'July 15, 2025',
+      status: "Planning",
+      dueDate: "July 15, 2025",
       team: 5,
       tasks: { completed: 8, total: 26 },
-      category: 'Development',
-      priority: 'Low'
-    }
+      category: "Development",
+      priority: "Low",
+    },
   ];
 
-  const categories = ['All', 'Development', 'Event', 'Design', 'Research', 'Community'];
-  const statuses = ['All', 'Planning', 'In Progress', 'Review', 'Completed'];
+  const categories = [
+    "All",
+    "Development",
+    "Event",
+    "Design",
+    "Research",
+    "Community",
+  ];
+  const statuses = ["All", "Planning", "In Progress", "Review", "Completed"];
 
   // Function to determine color based on priority
   const getPriorityColor = (priority) => {
-    switch(priority) {
-      case 'High': return 'text-red-600 bg-red-50';
-      case 'Medium': return 'text-amber-600 bg-amber-50';
-      case 'Low': return 'text-green-600 bg-green-50';
-      default: return 'text-gray-600 bg-gray-50';
+    switch (priority) {
+      case "High":
+        return "text-red-600 bg-red-50";
+      case "Medium":
+        return "text-amber-600 bg-amber-50";
+      case "Low":
+        return "text-green-600 bg-green-50";
+      default:
+        return "text-gray-600 bg-gray-50";
     }
   };
 
   // Function to determine color based on status
   const getStatusColor = (status) => {
-    switch(status) {
-      case 'Planning': return 'text-blue-600 bg-blue-50';
-      case 'In Progress': return 'text-amber-600 bg-amber-50';
-      case 'Review': return 'text-purple-600 bg-purple-50';
-      case 'Completed': return 'text-green-600 bg-green-50';
-      default: return 'text-gray-600 bg-gray-50';
+    switch (status) {
+      case "Planning":
+        return "text-blue-600 bg-blue-50";
+      case "In Progress":
+        return "text-amber-600 bg-amber-50";
+      case "Review":
+        return "text-purple-600 bg-purple-50";
+      case "Completed":
+        return "text-green-600 bg-green-50";
+      default:
+        return "text-gray-600 bg-gray-50";
     }
   };
 
@@ -107,7 +136,9 @@ export default function Projects() {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold text-gray-800">Projects</h1>
-          <p className="text-gray-600">Track and manage collaborative projects</p>
+          <p className="text-gray-600">
+            Track and manage collaborative projects
+          </p>
         </div>
         <button className="bg-indigo-600 text-white px-4 py-2 rounded-lg flex items-center">
           <Plus className="w-5 h-5 mr-2" />
@@ -133,7 +164,7 @@ export default function Projects() {
             <select className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block p-2.5">
               <option value="">Filter by Status</option>
               {statuses.map((status) => (
-                <option key={status} value={status === 'All' ? '' : status}>
+                <option key={status} value={status === "All" ? "" : status}>
                   {status}
                 </option>
               ))}
@@ -152,9 +183,9 @@ export default function Projects() {
               <button
                 key={category}
                 className={`px-3 py-1 rounded-full text-sm ${
-                  category === 'All'
-                    ? 'bg-indigo-100 text-indigo-700'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  category === "All"
+                    ? "bg-indigo-100 text-indigo-700"
+                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                 }`}
               >
                 {category}
@@ -167,15 +198,24 @@ export default function Projects() {
       {/* Projects Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
         {projects.map((project) => (
-          <div key={project.id} className="bg-white rounded-lg shadow hover:shadow-md transition-shadow">
+          <div
+            key={project.id}
+            className="bg-white rounded-lg shadow hover:shadow-md transition-shadow"
+          >
             <div className="p-4 border-b flex items-center justify-between">
               <h3 className="font-semibold text-gray-800">{project.name}</h3>
-              <span className={`text-xs px-2 py-1 rounded-full ${getStatusColor(project.status)}`}>
+              <span
+                className={`text-xs px-2 py-1 rounded-full ${getStatusColor(
+                  project.status
+                )}`}
+              >
                 {project.status}
               </span>
             </div>
             <div className="p-4">
-              <p className="text-sm text-gray-600 mb-4">{project.description}</p>
+              <p className="text-sm text-gray-600 mb-4">
+                {project.description}
+              </p>
 
               <div className="mb-4">
                 <div className="flex justify-between text-xs text-gray-500 mb-1">
@@ -214,7 +254,11 @@ export default function Projects() {
                     {project.tasks.completed}/{project.tasks.total} tasks
                   </span>
                 </div>
-                <span className={`text-xs px-2 py-1 rounded-full ${getPriorityColor(project.priority)}`}>
+                <span
+                  className={`text-xs px-2 py-1 rounded-full ${getPriorityColor(
+                    project.priority
+                  )}`}
+                >
                   {project.priority}
                 </span>
               </div>
