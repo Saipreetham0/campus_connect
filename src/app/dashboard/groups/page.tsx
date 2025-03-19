@@ -585,8 +585,15 @@ export default function Groups() {
           storage,
           `groups/${selectedGroup.id}/${Date.now()}_${fileUpload.name}`
         );
-        await uploadBytes(fileRef, fileUpload);
-        fileURL = await getDownloadURL(fileRef);
+
+        try {
+          await uploadBytes(fileRef, fileUpload);
+          fileURL = await getDownloadURL(fileRef);
+        } catch (uploadError) {
+          console.error("File upload error details:", uploadError);
+          // Continue with just the text message
+          fileURL = undefined;
+        }
         fileType = fileUpload.type.split("/")[0]; // 'image', 'video', etc.
         fileName = fileUpload.name;
       }
@@ -595,7 +602,8 @@ export default function Groups() {
       const messageData: Partial<Message> = {
         groupId: selectedGroup.id,
         senderId: currentUser.uid,
-        senderName: currentUser.displayName || currentUser.email || "Unknown User",
+        senderName:
+          currentUser.displayName || currentUser.email || "Unknown User",
         text: message.trim(),
         timestamp: serverTimestamp(),
       };
@@ -616,7 +624,8 @@ export default function Groups() {
         id: docRef.id,
         groupId: selectedGroup.id,
         senderId: currentUser.uid,
-        senderName: currentUser.displayName || currentUser.email || "Unknown User",
+        senderName:
+          currentUser.displayName || currentUser.email || "Unknown User",
         text: message.trim(),
         fileURL,
         fileType,
