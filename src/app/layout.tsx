@@ -5,8 +5,8 @@ import { Inter } from "next/font/google";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata = {
-  title: "Next.js Firebase Auth",
-  description: "Authentication with Next.js and Firebase",
+  title: "Campus Connect",
+  description: "Campus Connect is a platform for students to collaborate on projects",
 };
 
 export default function RootLayout({

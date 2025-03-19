@@ -1,3 +1,4 @@
+
 // // File: src/app/dashboard/layout.tsx
 // "use client";
 
@@ -17,6 +18,7 @@
 //   Bell,
 //   Search,
 //   User,
+//   GraduationCap,
 // } from "lucide-react";
 
 // interface SidebarProps {
@@ -24,17 +26,22 @@
 // }
 
 // export default function DashboardLayout({ children }: SidebarProps) {
-//   const { user, loading, logout } = useAuth();
+//   const { currentUser, logout } = useAuth();
 //   const router = useRouter();
 //   const pathname = usePathname();
 //   const [sidebarOpen, setSidebarOpen] = useState(true);
 //   const [isMobile, setIsMobile] = useState(false);
+//   const [loading, setLoading] = useState(true);
+//   const [searchQuery, setSearchQuery] = useState("");
 
 //   useEffect(() => {
-//     if (!loading && !user) {
+//     // Check if user is authenticated
+//     if (currentUser === null) {
 //       router.push("/login");
+//     } else {
+//       setLoading(false);
 //     }
-//   }, [user, loading, router]);
+//   }, [currentUser, router]);
 
 //   useEffect(() => {
 //     const checkScreenSize = () => {
@@ -57,6 +64,13 @@
 //     }
 //   };
 
+//   const handleSearch = (e: React.FormEvent) => {
+//     e.preventDefault();
+//     if (searchQuery.trim()) {
+//       router.push(`/dashboard/students?q=${encodeURIComponent(searchQuery)}`);
+//     }
+//   };
+
 //   if (loading) {
 //     return (
 //       <div className="flex min-h-screen items-center justify-center">
@@ -70,6 +84,11 @@
 //       path: "/dashboard",
 //       label: "Dashboard",
 //       icon: <Home className="w-5 h-5" />,
+//     },
+//     {
+//       path: "/dashboard/students",
+//       label: "Students",
+//       icon: <GraduationCap className="w-5 h-5" />,
 //     },
 //     {
 //       path: "/dashboard/events",
@@ -117,19 +136,19 @@
 //             </div>
 //             <div>
 //               <p className="font-medium truncate">
-//                 {user?.email?.split("@")[0] || "User"}
+//                 {currentUser?.email?.split("@")[0] || "User"}
 //               </p>
-//               <p className="text-xs text-gray-500 truncate">{user?.email}</p>
+//               <p className="text-xs text-gray-500 truncate">{currentUser?.email}</p>
 //             </div>
 //           </div>
 
 //           <nav className="space-y-1">
-//             {menuItems.map((item) => (
+//             {/* {menuItems.map((item) => (
 //               <Link
 //                 href={item.path}
 //                 key={item.path}
 //                 className={`flex items-center space-x-3 px-3 py-2 rounded-lg ${
-//                   pathname === item.path
+//                   pathname === item.path || pathname?.startsWith(`${item.path}/`)
 //                     ? "bg-indigo-50 text-indigo-700"
 //                     : "text-gray-700 hover:bg-gray-100"
 //                 }`}
@@ -137,7 +156,28 @@
 //                 {item.icon}
 //                 <span>{item.label}</span>
 //               </Link>
-//             ))}
+//             ))} */}
+
+// {menuItems.map((item) => (
+//   <Link
+//     href={item.path}
+//     key={item.path}
+//     className={`flex items-center space-x-3 px-3 py-2 rounded-lg ${
+//       (pathname === item.path ||
+//        (pathname?.startsWith(`${item.path}/`) &&
+//         !menuItems.some(otherItem =>
+//           otherItem.path !== item.path &&
+//           otherItem.path.startsWith(item.path) &&
+//           pathname.startsWith(otherItem.path)
+//         )))
+//         ? "bg-indigo-50 text-indigo-700"
+//         : "text-gray-700 hover:bg-gray-100"
+//     }`}
+//   >
+//     {item.icon}
+//     <span>{item.label}</span>
+//   </Link>
+// ))}
 //           </nav>
 //         </div>
 
@@ -164,14 +204,18 @@
 //                 </button>
 //               )}
 //               <div className="relative w-64 md:w-80">
-//                 <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-//                   <Search className="w-5 h-5 text-gray-400" />
-//                 </div>
-//                 <input
-//                   type="text"
-//                   className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full pl-10 p-2.5 focus:ring-indigo-500 focus:border-indigo-500"
-//                   placeholder="Search..."
-//                 />
+//                 <form onSubmit={handleSearch}>
+//                   <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+//                     <Search className="w-5 h-5 text-gray-400" />
+//                   </div>
+//                   <input
+//                     type="text"
+//                     className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full pl-10 p-2.5 focus:ring-indigo-500 focus:border-indigo-500"
+//                     placeholder="Search students..."
+//                     value={searchQuery}
+//                     onChange={(e) => setSearchQuery(e.target.value)}
+//                   />
+//                 </form>
 //               </div>
 //             </div>
 //             <div className="flex items-center">
@@ -194,7 +238,6 @@
 //   );
 // }
 
-
 // File: src/app/dashboard/layout.tsx
 "use client";
 
@@ -214,6 +257,7 @@ import {
   Bell,
   Search,
   User,
+  GraduationCap,
 } from "lucide-react";
 
 interface SidebarProps {
@@ -227,6 +271,7 @@ export default function DashboardLayout({ children }: SidebarProps) {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
     // Check if user is authenticated
@@ -249,6 +294,15 @@ export default function DashboardLayout({ children }: SidebarProps) {
     return () => window.removeEventListener("resize", checkScreenSize);
   }, []);
 
+  // Extract search term from URL when component mounts
+  useEffect(() => {
+    const searchParams = new URLSearchParams(window.location.search);
+    const queryParam = searchParams.get('q');
+    if (queryParam) {
+      setSearchQuery(queryParam);
+    }
+  }, []);
+
   const handleLogout = async () => {
     try {
       await logout();
@@ -258,10 +312,18 @@ export default function DashboardLayout({ children }: SidebarProps) {
     }
   };
 
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      // Navigate to the students page with the search query
+      router.push(`/dashboard/students?q=${encodeURIComponent(searchQuery.trim())}`);
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
-        Loading...
+        <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-indigo-500"></div>
       </div>
     );
   }
@@ -271,6 +333,11 @@ export default function DashboardLayout({ children }: SidebarProps) {
       path: "/dashboard",
       label: "Dashboard",
       icon: <Home className="w-5 h-5" />,
+    },
+    {
+      path: "/dashboard/students",
+      label: "Students",
+      icon: <GraduationCap className="w-5 h-5" />,
     },
     {
       path: "/dashboard/events",
@@ -330,7 +397,13 @@ export default function DashboardLayout({ children }: SidebarProps) {
                 href={item.path}
                 key={item.path}
                 className={`flex items-center space-x-3 px-3 py-2 rounded-lg ${
-                  pathname === item.path
+                  (pathname === item.path ||
+                  (pathname?.startsWith(`${item.path}/`) &&
+                    !menuItems.some(otherItem =>
+                      otherItem.path !== item.path &&
+                      otherItem.path.startsWith(item.path) &&
+                      pathname.startsWith(otherItem.path)
+                    )))
                     ? "bg-indigo-50 text-indigo-700"
                     : "text-gray-700 hover:bg-gray-100"
                 }`}
@@ -365,14 +438,27 @@ export default function DashboardLayout({ children }: SidebarProps) {
                 </button>
               )}
               <div className="relative w-64 md:w-80">
-                <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                  <Search className="w-5 h-5 text-gray-400" />
-                </div>
-                <input
-                  type="text"
-                  className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full pl-10 p-2.5 focus:ring-indigo-500 focus:border-indigo-500"
-                  placeholder="Search..."
-                />
+                <form onSubmit={handleSearch}>
+                  <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                    <Search className="w-5 h-5 text-gray-400" />
+                  </div>
+                  <input
+                    type="text"
+                    className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full pl-10 p-2.5 focus:ring-indigo-500 focus:border-indigo-500"
+                    placeholder="Search students..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                  />
+                  <button
+                    type="submit"
+                    className="absolute inset-y-0 right-0 flex items-center pr-3"
+                    aria-label="Search"
+                  >
+                    <div className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-200">
+                      <Search className="w-4 h-4 text-gray-500" />
+                    </div>
+                  </button>
+                </form>
               </div>
             </div>
             <div className="flex items-center">

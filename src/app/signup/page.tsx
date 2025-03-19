@@ -50,6 +50,11 @@ export default function SignUp() {
           year,
         },
         email,
+        // createdAt: new Date().toISOString(),
+        // Add lowercase fields for searching
+        firstName_lower: firstName.toLowerCase(),
+        lastName_lower: lastName.toLowerCase(),
+        email_lower: email.toLowerCase(),
         createdAt: new Date().toISOString(),
       });
 
