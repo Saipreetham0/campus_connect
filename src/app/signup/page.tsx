@@ -154,6 +154,8 @@ export default function SignUp() {
           achievements,
           email,
           // Add lowercase fields for searching
+          // Add this new array with lowercase skills
+          skills_lower: skills.map((skill) => skill.toLowerCase()),
           firstName_lower: firstName.toLowerCase(),
           lastName_lower: lastName.toLowerCase(),
           email_lower: email.toLowerCase(),

@@ -269,7 +269,7 @@ import {
   X,
   Home,
   LogOut,
-  Bell,
+  // Bell,
   Search,
   User,
   // GraduationCap,
@@ -371,11 +371,11 @@ export default function DashboardLayout({ children }: SidebarProps) {
       label: "Projects",
       icon: <FolderKanban className="w-5 h-5" />,
     },
-    {
-      path: "/dashboard/profile",
-      label: "My Profile",
-      icon: <User className="w-5 h-5" />,
-    },
+    // {
+    //   path: "/dashboard/profile",
+    //   label: "My Profile",
+    //   icon: <User className="w-5 h-5" />,
+    // },
     {
       path: "/dashboard/faq",
       label: "FAQ",
@@ -490,12 +490,12 @@ export default function DashboardLayout({ children }: SidebarProps) {
               </div>
             </div>
             <div className="flex items-center">
-              <button className="relative p-2 text-gray-600 hover:text-gray-900 mr-4">
+              {/* <button className="relative p-2 text-gray-600 hover:text-gray-900 mr-4">
                 <Bell className="w-6 h-6" />
                 <span className="absolute top-1 right-1 inline-flex items-center justify-center w-4 h-4 text-xs font-semibold text-white bg-red-500 rounded-full">
                   3
                 </span>
-              </button>
+              </button> */}
             </div>
           </div>
         </header>
