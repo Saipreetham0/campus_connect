@@ -1,16 +1,16 @@
 // src/lib/firebase.ts
-import { initializeApp } from 'firebase/app';
-import { getAuth } from 'firebase/auth';
-import { getFirestore } from 'firebase/firestore';
-import { getStorage } from 'firebase/storage';
+import { initializeApp } from "firebase/app";
+import { getAuth } from "firebase/auth";
+import { getFirestore } from "firebase/firestore";
+import { getStorage } from "firebase/storage";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCKsBYPEzCcnDF8O4nRpg8DM0ztRMAuw9Q",
   authDomain: "campus-connect-bcaaa.firebaseapp.com",
   projectId: "campus-connect-bcaaa",
-  storageBucket: "campus-connect-bcaaa.appspot.com",
+  storageBucket: "campus-connect-bcaaa.firebasestorage.app",
   messagingSenderId: "788684280068",
-  appId: "1:788684280068:web:9666d2a79fc6d746d3c051"
+  appId: "1:788684280068:web:9666d2a79fc6d746d3c051",
 };
 
 // Initialize Firebase

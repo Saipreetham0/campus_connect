@@ -23,13 +23,7 @@ export default function CreateProject() {
   const [isUploading, setIsUploading] = useState(false);
   const [error, setError] = useState("");
 
-  const categories = [
-    "Development",
-    "Event",
-    "Design",
-    "Research",
-    "Community",
-  ];
+  const categories = ["CSE", "IT", "ECE", "MECH", "EEE", "CIVIL"];
 
   // Handle project creation
   const handleProjectCreate = async (e: React.FormEvent) => {
@@ -58,7 +52,7 @@ export default function CreateProject() {
         status: "Planning",
         createdAt: serverTimestamp(),
         userId: currentUser.uid,
-        userEmail: currentUser.email
+        userEmail: currentUser.email,
       });
 
       // Redirect to projects page after successful creation
@@ -73,7 +67,10 @@ export default function CreateProject() {
   return (
     <div className="max-w-4xl mx-auto p-4">
       <div className="mb-6">
-        <Link href="/dashboard/projects" className="text-gray-600 hover:text-gray-800 flex items-center">
+        <Link
+          href="/dashboard/projects"
+          className="text-gray-600 hover:text-gray-800 flex items-center"
+        >
           <ArrowLeft className="w-5 h-5 mr-2" />
           Back to Projects
         </Link>
@@ -81,7 +78,9 @@ export default function CreateProject() {
 
       <div className="bg-white rounded-lg shadow">
         <div className="p-6 border-b">
-          <h1 className="text-2xl font-bold text-gray-800">Create New Project</h1>
+          <h1 className="text-2xl font-bold text-gray-800">
+            Create New Project
+          </h1>
           <p className="text-gray-600 mt-2">
             Fill in the details below to create a new project
           </p>
@@ -95,7 +94,10 @@ export default function CreateProject() {
           )}
 
           <div className="mb-6">
-            <label className="block text-gray-700 mb-2 font-medium" htmlFor="title">
+            <label
+              className="block text-gray-700 mb-2 font-medium"
+              htmlFor="title"
+            >
               Project Title *
             </label>
             <input
@@ -112,7 +114,10 @@ export default function CreateProject() {
           </div>
 
           <div className="mb-6">
-            <label className="block text-gray-700 mb-2 font-medium" htmlFor="abstract">
+            <label
+              className="block text-gray-700 mb-2 font-medium"
+              htmlFor="abstract"
+            >
               Project Abstract *
             </label>
             <textarea
@@ -126,7 +131,10 @@ export default function CreateProject() {
           </div>
 
           <div className="mb-8">
-            <label className="block text-gray-700 mb-2 font-medium" htmlFor="category">
+            <label
+              className="block text-gray-700 mb-2 font-medium"
+              htmlFor="category"
+            >
               Category *
             </label>
             <select
