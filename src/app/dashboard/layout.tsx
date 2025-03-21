@@ -336,7 +336,7 @@ export default function DashboardLayout({ children }: SidebarProps) {
     },
     {
       path: "/dashboard/students",
-      label: "Students",
+      label: "Search",
       icon: <GraduationCap className="w-5 h-5" />,
     },
     {
