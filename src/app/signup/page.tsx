@@ -21,8 +21,8 @@ export default function SignUp() {
   const [studentId, setStudentId] = useState("");
 
   // College fields
-  const [college, setCollege] = useState("");
-  const [department, setDepartment] = useState("");
+  // const [college, setCollege] = useState("");
+  // const [department, setDepartment] = useState("");
   const [branch, setBranch] = useState("");
   const [year, setYear] = useState("");
 
@@ -66,7 +66,10 @@ export default function SignUp() {
   };
 
   const handleAddAchievement = () => {
-    if (newAchievement.trim() && !achievements.includes(newAchievement.trim())) {
+    if (
+      newAchievement.trim() &&
+      !achievements.includes(newAchievement.trim())
+    ) {
       setAchievements([...achievements, newAchievement.trim()]);
       setNewAchievement("");
     }
@@ -143,12 +146,9 @@ export default function SignUp() {
           firstName,
           lastName,
           studentId,
-          college: {
-            name: college,
-            department,
-            branch,
-            year,
-          },
+          // department,
+          branch,
+          year,
           interests,
           skills,
           achievements,
@@ -162,15 +162,21 @@ export default function SignUp() {
 
         router.push("/dashboard");
       } catch (authError) {
-        if ((authError as { code: string }).code === "auth/email-already-in-use") {
-          setError("This email is already registered. Please use a different email or try logging in.");
+        if (
+          (authError as { code: string }).code === "auth/email-already-in-use"
+        ) {
+          setError(
+            "This email is already registered. Please use a different email or try logging in."
+          );
         } else {
           throw authError; // Re-throw if it's not the email-already-in-use error
         }
       }
     } catch (error) {
       console.error("Signup error:", error);
-      setError((error instanceof Error ? error.message : "Failed to create an account"));
+      setError(
+        error instanceof Error ? error.message : "Failed to create an account"
+      );
     } finally {
       setLoading(false);
     }
@@ -227,7 +233,10 @@ export default function SignUp() {
               </h3>
 
               <div>
-                <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+                <label
+                  htmlFor="email"
+                  className="block text-sm font-medium text-gray-700"
+                >
                   Email Address
                 </label>
                 <input
@@ -241,7 +250,10 @@ export default function SignUp() {
               </div>
 
               <div>
-                <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+                <label
+                  htmlFor="password"
+                  className="block text-sm font-medium text-gray-700"
+                >
                   Password
                 </label>
                 <input
@@ -268,7 +280,10 @@ export default function SignUp() {
 
               <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
                 <div>
-                  <label htmlFor="firstName" className="block text-sm font-medium text-gray-700">
+                  <label
+                    htmlFor="firstName"
+                    className="block text-sm font-medium text-gray-700"
+                  >
                     First Name
                   </label>
                   <input
@@ -282,7 +297,10 @@ export default function SignUp() {
                 </div>
 
                 <div>
-                  <label htmlFor="lastName" className="block text-sm font-medium text-gray-700">
+                  <label
+                    htmlFor="lastName"
+                    className="block text-sm font-medium text-gray-700"
+                  >
                     Last Name
                   </label>
                   <input
@@ -297,7 +315,10 @@ export default function SignUp() {
               </div>
 
               <div>
-                <label htmlFor="studentId" className="block text-sm font-medium text-gray-700">
+                <label
+                  htmlFor="studentId"
+                  className="block text-sm font-medium text-gray-700"
+                >
                   Student ID
                 </label>
                 <input
@@ -319,37 +340,12 @@ export default function SignUp() {
                 Academic Information
               </h3>
 
-              <div>
-                <label htmlFor="college" className="block text-sm font-medium text-gray-700">
-                  College/University Name
-                </label>
-                <input
-                  id="college"
-                  type="text"
-                  value={college}
-                  onChange={(e) => setCollege(e.target.value)}
-                  required
-                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                />
-              </div>
-
               <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
                 <div>
-                  <label htmlFor="department" className="block text-sm font-medium text-gray-700">
-                    Department
-                  </label>
-                  <input
-                    id="department"
-                    type="text"
-                    value={department}
-                    onChange={(e) => setDepartment(e.target.value)}
-                    required
-                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                  />
-                </div>
-
-                <div>
-                  <label htmlFor="branch" className="block text-sm font-medium text-gray-700">
+                  <label
+                    htmlFor="branch"
+                    className="block text-sm font-medium text-gray-700"
+                  >
                     Branch/Specialization
                   </label>
                   <input
@@ -364,7 +360,10 @@ export default function SignUp() {
               </div>
 
               <div>
-                <label htmlFor="year" className="block text-sm font-medium text-gray-700">
+                <label
+                  htmlFor="year"
+                  className="block text-sm font-medium text-gray-700"
+                >
                   Year of Study
                 </label>
                 <select
@@ -423,7 +422,7 @@ export default function SignUp() {
                     placeholder="Add an interest (e.g., Machine Learning)"
                     className="flex-grow px-3 py-2 border border-gray-300 rounded-l-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                     onKeyPress={(e) => {
-                      if (e.key === 'Enter') {
+                      if (e.key === "Enter") {
                         e.preventDefault();
                         handleAddInterest();
                       }
@@ -472,7 +471,7 @@ export default function SignUp() {
                     placeholder="Add a skill (e.g., JavaScript, React)"
                     className="flex-grow px-3 py-2 border border-gray-300 rounded-l-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                     onKeyPress={(e) => {
-                      if (e.key === 'Enter') {
+                      if (e.key === "Enter") {
                         e.preventDefault();
                         handleAddSkill();
                       }
@@ -502,7 +501,9 @@ export default function SignUp() {
                       key={index}
                       className="flex items-center justify-between bg-green-50 p-2 rounded-md"
                     >
-                      <span className="text-green-800 text-sm">{achievement}</span>
+                      <span className="text-green-800 text-sm">
+                        {achievement}
+                      </span>
                       <button
                         type="button"
                         onClick={() => handleRemoveAchievement(index)}
@@ -521,7 +522,7 @@ export default function SignUp() {
                     placeholder="Add an achievement (e.g., AWS Certified Developer)"
                     className="flex-grow px-3 py-2 border border-gray-300 rounded-l-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                     onKeyPress={(e) => {
-                      if (e.key === 'Enter') {
+                      if (e.key === "Enter") {
                         e.preventDefault();
                         handleAddAchievement();
                       }
