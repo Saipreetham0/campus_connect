@@ -1058,7 +1058,7 @@ export default function StudentSearch() {
       // Format the term for case-insensitive search
       const searchTermLower = term.toLowerCase();
       const studentsRef = collection(db, "students");
-      let snapshots: QuerySnapshot<DocumentData>[] = [];
+      const snapshots: QuerySnapshot<DocumentData>[] = [];
 
       if (type === 'all' || type === 'skill') {
         // Skill search is always performed
@@ -1096,7 +1096,15 @@ export default function StudentSearch() {
             getDocs(exactSkillQuery),
             getDocs(lowerSkillQuery),
             getDocs(capitalizedSkillQuery),
-            getDocs(skillsLowerQuery).catch(() => ({ docs: [] } as QuerySnapshot<DocumentData>))
+            getDocs(skillsLowerQuery).catch(() => ({
+              docs: [],
+              metadata: { hasPendingWrites: false, fromCache: false },
+              query: skillsLowerQuery,
+              size: 0,
+              empty: true,
+              docChanges: () => [],
+              forEach: () => {}
+            } as unknown as QuerySnapshot<DocumentData>))
           ]);
 
         snapshots.push(exactSkillSnapshot, lowerSkillSnapshot, capitalizedSkillSnapshot);
@@ -1217,7 +1225,7 @@ export default function StudentSearch() {
     try {
       const searchTermLower = searchTerm.toLowerCase();
       const studentsRef = collection(db, "students");
-      let snapshots: QuerySnapshot<DocumentData>[] = [];
+      const snapshots: QuerySnapshot<DocumentData>[] = [];
 
       if (searchType === 'all' || searchType === 'skill') {
         // Similar multi-approach skill search for pagination
@@ -1262,7 +1270,7 @@ export default function StudentSearch() {
           );
           const skillsLowerSnapshot = await getDocs(skillsLowerQuery);
           snapshots.push(skillsLowerSnapshot);
-        } catch (e) {
+        } catch {
           // If skills_lower doesn't exist, continue without it
         }
       }
