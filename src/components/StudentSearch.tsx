@@ -4,7 +4,18 @@
 // import { useState, useEffect } from "react";
 // import { useSearchParams } from "next/navigation";
 // import { db } from "@/lib/firebase";
-// import { collection, query, where, getDocs, orderBy, limit, startAfter, DocumentData } from "firebase/firestore";
+// import {
+//   collection,
+//   query,
+//   where,
+//   getDocs,
+//   orderBy,
+//   limit,
+//   startAfter,
+//   DocumentData,
+//   QueryDocumentSnapshot,
+//   QuerySnapshot
+// } from "firebase/firestore";
 // import { Search, User, Mail, School, BookOpen } from "lucide-react";
 // import Link from "next/link";
 
@@ -93,8 +104,8 @@
 //       const studentsMap = new Map<string, Student>();
 
 //       // Process results from all queries
-//       const processSnapshot = (snapshot) => {
-//         snapshot.forEach((doc) => {
+//       const processSnapshot = (snapshot: QuerySnapshot<DocumentData>) => {
+//         snapshot.forEach((doc: QueryDocumentSnapshot<DocumentData>) => {
 //           if (!studentsMap.has(doc.id)) {
 //             const data = doc.data();
 //             studentsMap.set(doc.id, {
@@ -183,8 +194,8 @@
 //       // Process new results and deduplicate with existing results
 //       const existingIds = new Set(searchResults.map(student => student.id));
 
-//       const processSnapshot = (snapshot) => {
-//         snapshot.forEach((doc) => {
+//       const processSnapshot = (snapshot: QuerySnapshot<DocumentData>) => {
+//         snapshot.forEach((doc: QueryDocumentSnapshot<DocumentData>) => {
 //           if (!existingIds.has(doc.id) && !studentsMap.has(doc.id)) {
 //             const data = doc.data();
 //             studentsMap.set(doc.id, {
@@ -257,7 +268,7 @@
 //         </div>
 //       ) : noResults ? (
 //         <div className="text-center py-10">
-//           <p className="text-gray-500">No students found matching "{searchTerm}"</p>
+//           <p className="text-gray-500">No students found matching &quot;{searchTerm}&quot;</p>
 //         </div>
 //       ) : (
 //         <div className="space-y-4">
@@ -321,6 +332,8 @@
 //   );
 // }
 
+
+
 "use client";
 
 import { useState, useEffect } from "react";
@@ -336,9 +349,10 @@ import {
   startAfter,
   DocumentData,
   QueryDocumentSnapshot,
-  QuerySnapshot
+  QuerySnapshot,
+  // arrayContains
 } from "firebase/firestore";
-import { Search, User, Mail, School, BookOpen } from "lucide-react";
+import { Search, User, Mail, School, BookOpen, Code } from "lucide-react";
 import Link from "next/link";
 
 type Student = {
@@ -352,29 +366,52 @@ type Student = {
     department: string;
     year: string;
   };
+  skills: string[];
+  interests: string[];
+  achievements: string[];
 };
 
 export default function StudentSearch() {
   const searchParams = useSearchParams();
   const urlSearchQuery = searchParams.get('q');
+  const urlSkillQuery = searchParams.get('skill');
 
   const [searchTerm, setSearchTerm] = useState(urlSearchQuery || "");
+  const [skillFilter, setSkillFilter] = useState(urlSkillQuery || "");
   const [searchResults, setSearchResults] = useState<Student[]>([]);
   const [loading, setLoading] = useState(false);
   const [noResults, setNoResults] = useState(false);
   const [lastVisible, setLastVisible] = useState<DocumentData | null>(null);
   const [loadingMore, setLoadingMore] = useState(false);
   const [allResultsLoaded, setAllResultsLoaded] = useState(false);
+  const [popularSkills, setPopularSkills] = useState<string[]>([]);
 
   // Execute search when component mounts if there's a query parameter
   useEffect(() => {
-    if (urlSearchQuery) {
-      searchStudents(urlSearchQuery);
+    if (urlSearchQuery || urlSkillQuery) {
+      searchStudents(urlSearchQuery || "", urlSkillQuery || "");
     }
-  }, [urlSearchQuery]);
+    fetchPopularSkills();
+  }, [urlSearchQuery, urlSkillQuery]);
 
-  const searchStudents = async (term: string) => {
-    if (!term.trim()) {
+  const fetchPopularSkills = async () => {
+    try {
+      const skillsQuery = query(
+        collection(db, "skills"),
+        orderBy("count", "desc"),
+        limit(10)
+      );
+
+      const skillsSnapshot = await getDocs(skillsQuery);
+      const skills = skillsSnapshot.docs.map(doc => doc.id);
+      setPopularSkills(skills);
+    } catch (error) {
+      console.error("Error fetching popular skills:", error);
+    }
+  };
+
+  const searchStudents = async (term: string, skill: string = "") => {
+    if (!term.trim() && !skill.trim()) {
       setSearchResults([]);
       setNoResults(false);
       return;
@@ -386,41 +423,56 @@ export default function StudentSearch() {
     try {
       // Format the term for case-insensitive search
       const searchTermLower = term.toLowerCase();
-
-      // Create a query against the students collection
       const studentsRef = collection(db, "students");
+      let snapshots: QuerySnapshot<DocumentData>[] = [];
 
-      // Perform search using lowercase fields
-      const firstNameQuery = query(
-        studentsRef,
-        where("firstName_lower", ">=", searchTermLower),
-        where("firstName_lower", "<=", searchTermLower + "\uf8ff"),
-        orderBy("firstName_lower"),
-        limit(10)
-      );
+      if (term.trim()) {
+        // Perform name and email search
+        const firstNameQuery = query(
+          studentsRef,
+          where("firstName_lower", ">=", searchTermLower),
+          where("firstName_lower", "<=", searchTermLower + "\uf8ff"),
+          orderBy("firstName_lower"),
+          limit(10)
+        );
 
-      const lastNameQuery = query(
-        studentsRef,
-        where("lastName_lower", ">=", searchTermLower),
-        where("lastName_lower", "<=", searchTermLower + "\uf8ff"),
-        orderBy("lastName_lower"),
-        limit(10)
-      );
+        const lastNameQuery = query(
+          studentsRef,
+          where("lastName_lower", ">=", searchTermLower),
+          where("lastName_lower", "<=", searchTermLower + "\uf8ff"),
+          orderBy("lastName_lower"),
+          limit(10)
+        );
 
-      const emailQuery = query(
-        studentsRef,
-        where("email_lower", ">=", searchTermLower),
-        where("email_lower", "<=", searchTermLower + "\uf8ff"),
-        orderBy("email_lower"),
-        limit(10)
-      );
+        const emailQuery = query(
+          studentsRef,
+          where("email_lower", ">=", searchTermLower),
+          where("email_lower", "<=", searchTermLower + "\uf8ff"),
+          orderBy("email_lower"),
+          limit(10)
+        );
 
-      // Execute all queries
-      const [firstNameSnapshot, lastNameSnapshot, emailSnapshot] = await Promise.all([
-        getDocs(firstNameQuery),
-        getDocs(lastNameQuery),
-        getDocs(emailQuery)
-      ]);
+        // Execute queries
+        const [firstNameSnapshot, lastNameSnapshot, emailSnapshot] = await Promise.all([
+          getDocs(firstNameQuery),
+          getDocs(lastNameQuery),
+          getDocs(emailQuery)
+        ]);
+
+        snapshots = [firstNameSnapshot, lastNameSnapshot, emailSnapshot];
+      }
+
+      // Add skill search if a skill filter is provided
+      if (skill.trim()) {
+        const skillQuery = query(
+          studentsRef,
+          where("skills", "array-contains", skill.trim()),
+          limit(10)
+        );
+
+        const skillSnapshot = await getDocs(skillQuery);
+        snapshots.push(skillSnapshot);
+      }
 
       // Combine and deduplicate results
       const studentsMap = new Map<string, Student>();
@@ -436,15 +488,20 @@ export default function StudentSearch() {
               lastName: data.lastName,
               email: data.email,
               studentId: data.studentId,
-              college: data.college,
+              college: data.college || {
+                name: data.branch || "",
+                department: data.branch || "",
+                year: data.year || ""
+              },
+              skills: data.skills || [],
+              interests: data.interests || [],
+              achievements: data.achievements || []
             });
           }
         });
       };
 
-      processSnapshot(firstNameSnapshot);
-      processSnapshot(lastNameSnapshot);
-      processSnapshot(emailSnapshot);
+      snapshots.forEach(snapshot => processSnapshot(snapshot));
 
       const results = Array.from(studentsMap.values());
 
@@ -452,10 +509,15 @@ export default function StudentSearch() {
       setNoResults(results.length === 0);
 
       // Store the last visible document for pagination
-      if (results.length > 0) {
-        const lastDoc = lastNameSnapshot.docs[lastNameSnapshot.docs.length - 1] ||
-                        firstNameSnapshot.docs[firstNameSnapshot.docs.length - 1] ||
-                        emailSnapshot.docs[emailSnapshot.docs.length - 1];
+      if (results.length > 0 && snapshots.length > 0) {
+        // Find the last doc from all queries
+        let lastDoc = null;
+        for (const snapshot of snapshots) {
+          if (snapshot.docs.length > 0) {
+            lastDoc = snapshot.docs[snapshot.docs.length - 1];
+            break;
+          }
+        }
         setLastVisible(lastDoc);
         setAllResultsLoaded(results.length < 10);
       } else {
@@ -470,46 +532,64 @@ export default function StudentSearch() {
   };
 
   const loadMoreResults = async () => {
-    if (!searchTerm.trim() || !lastVisible || loadingMore || allResultsLoaded) return;
+    if ((!searchTerm.trim() && !skillFilter.trim()) || !lastVisible || loadingMore || allResultsLoaded) return;
 
     setLoadingMore(true);
 
     try {
       const searchTermLower = searchTerm.toLowerCase();
       const studentsRef = collection(db, "students");
+      let snapshots: QuerySnapshot<DocumentData>[] = [];
 
-      const firstNameQuery = query(
-        studentsRef,
-        where("firstName_lower", ">=", searchTermLower),
-        where("firstName_lower", "<=", searchTermLower + "\uf8ff"),
-        orderBy("firstName_lower"),
-        startAfter(lastVisible),
-        limit(10)
-      );
+      if (searchTerm.trim()) {
+        const firstNameQuery = query(
+          studentsRef,
+          where("firstName_lower", ">=", searchTermLower),
+          where("firstName_lower", "<=", searchTermLower + "\uf8ff"),
+          orderBy("firstName_lower"),
+          startAfter(lastVisible),
+          limit(10)
+        );
 
-      const lastNameQuery = query(
-        studentsRef,
-        where("lastName_lower", ">=", searchTermLower),
-        where("lastName_lower", "<=", searchTermLower + "\uf8ff"),
-        orderBy("lastName_lower"),
-        startAfter(lastVisible),
-        limit(10)
-      );
+        const lastNameQuery = query(
+          studentsRef,
+          where("lastName_lower", ">=", searchTermLower),
+          where("lastName_lower", "<=", searchTermLower + "\uf8ff"),
+          orderBy("lastName_lower"),
+          startAfter(lastVisible),
+          limit(10)
+        );
 
-      const emailQuery = query(
-        studentsRef,
-        where("email_lower", ">=", searchTermLower),
-        where("email_lower", "<=", searchTermLower + "\uf8ff"),
-        orderBy("email_lower"),
-        startAfter(lastVisible),
-        limit(10)
-      );
+        const emailQuery = query(
+          studentsRef,
+          where("email_lower", ">=", searchTermLower),
+          where("email_lower", "<=", searchTermLower + "\uf8ff"),
+          orderBy("email_lower"),
+          startAfter(lastVisible),
+          limit(10)
+        );
 
-      const [firstNameSnapshot, lastNameSnapshot, emailSnapshot] = await Promise.all([
-        getDocs(firstNameQuery),
-        getDocs(lastNameQuery),
-        getDocs(emailQuery)
-      ]);
+        const [firstNameSnapshot, lastNameSnapshot, emailSnapshot] = await Promise.all([
+          getDocs(firstNameQuery),
+          getDocs(lastNameQuery),
+          getDocs(emailQuery)
+        ]);
+
+        snapshots = [firstNameSnapshot, lastNameSnapshot, emailSnapshot];
+      }
+
+      // Add skill search if a skill filter is provided
+      if (skillFilter.trim()) {
+        const skillQuery = query(
+          studentsRef,
+          where("skills", "array-contains", skillFilter.trim()),
+          startAfter(lastVisible),
+          limit(10)
+        );
+
+        const skillSnapshot = await getDocs(skillQuery);
+        snapshots.push(skillSnapshot);
+      }
 
       const studentsMap = new Map<string, Student>();
 
@@ -526,24 +606,35 @@ export default function StudentSearch() {
               lastName: data.lastName,
               email: data.email,
               studentId: data.studentId,
-              college: data.college,
+              college: data.college || {
+                name: data.branch || "",
+                department: data.branch || "",
+                year: data.year || ""
+              },
+              skills: data.skills || [],
+              interests: data.interests || [],
+              achievements: data.achievements || []
             });
           }
         });
       };
 
-      processSnapshot(firstNameSnapshot);
-      processSnapshot(lastNameSnapshot);
-      processSnapshot(emailSnapshot);
+      snapshots.forEach(snapshot => processSnapshot(snapshot));
 
       const newResults = Array.from(studentsMap.values());
 
       if (newResults.length > 0) {
         setSearchResults([...searchResults, ...newResults]);
 
-        const lastDoc = lastNameSnapshot.docs[lastNameSnapshot.docs.length - 1] ||
-                        firstNameSnapshot.docs[firstNameSnapshot.docs.length - 1] ||
-                        emailSnapshot.docs[emailSnapshot.docs.length - 1];
+        // Find the last doc from all queries
+        let lastDoc = null;
+        for (const snapshot of snapshots) {
+          if (snapshot.docs.length > 0) {
+            lastDoc = snapshot.docs[snapshot.docs.length - 1];
+            break;
+          }
+        }
+
         setLastVisible(lastDoc);
         setAllResultsLoaded(newResults.length < 10);
       } else {
@@ -558,13 +649,23 @@ export default function StudentSearch() {
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    searchStudents(searchTerm);
+    searchStudents(searchTerm, skillFilter);
+  };
+
+  const handleSkillClick = (skill: string) => {
+    setSkillFilter(skill);
+    searchStudents(searchTerm, skill);
+  };
+
+  const clearSkillFilter = () => {
+    setSkillFilter("");
+    searchStudents(searchTerm, "");
   };
 
   return (
     <div className="w-full">
       <form onSubmit={handleSearch} className="mb-6">
-        <div className="relative">
+        <div className="relative mb-4">
           <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
             <Search className="w-5 h-5 text-gray-400" />
           </div>
@@ -582,6 +683,51 @@ export default function StudentSearch() {
             Search
           </button>
         </div>
+
+        <div className="mb-2">
+          <label className="block text-sm font-medium text-gray-700 mb-1">Filter by skill:</label>
+          <div className="flex flex-wrap gap-2">
+            <input
+              type="text"
+              className="bg-white border border-gray-300 text-gray-900 text-sm rounded-lg p-2 focus:ring-indigo-500 focus:border-indigo-500 flex-grow"
+              placeholder="Enter a skill..."
+              value={skillFilter}
+              onChange={(e) => setSkillFilter(e.target.value)}
+            />
+          </div>
+        </div>
+
+        {skillFilter && (
+          <div className="mt-2">
+            <div className="flex items-center">
+              <span className="bg-indigo-100 text-indigo-800 text-xs font-medium px-2.5 py-0.5 rounded-full flex items-center">
+                {skillFilter}
+                <button
+                  onClick={clearSkillFilter}
+                  className="ml-1 text-indigo-600 hover:text-indigo-800"
+                >
+                  ×
+                </button>
+              </span>
+            </div>
+          </div>
+        )}
+
+        <div className="mt-3">
+          <label className="block text-sm font-medium text-gray-700 mb-1">Popular skills:</label>
+          <div className="flex flex-wrap gap-2">
+            {popularSkills.map((skill) => (
+              <button
+                key={skill}
+                type="button"
+                onClick={() => handleSkillClick(skill)}
+                className="bg-gray-100 text-gray-800 text-xs font-medium px-2.5 py-1 rounded-full hover:bg-indigo-100 hover:text-indigo-800"
+              >
+                {skill}
+              </button>
+            ))}
+          </div>
+        </div>
       </form>
 
       {loading ? (
@@ -590,7 +736,10 @@ export default function StudentSearch() {
         </div>
       ) : noResults ? (
         <div className="text-center py-10">
-          <p className="text-gray-500">No students found matching &quot;{searchTerm}&quot;</p>
+          <p className="text-gray-500">
+            No students found {searchTerm ? `matching "${searchTerm}"` : ""}
+            {skillFilter ? ` with skill "${skillFilter}"` : ""}
+          </p>
         </div>
       ) : (
         <div className="space-y-4">
@@ -613,7 +762,7 @@ export default function StudentSearch() {
                         </div>
                         <div className="flex items-center">
                           <School className="w-4 h-4 mr-1" />
-                          <span>{student.college.name}</span>
+                          <span>{student.college?.name || student.college?.department || "-"}</span>
                         </div>
                       </div>
                     </div>
@@ -621,9 +770,31 @@ export default function StudentSearch() {
                   <div className="mt-2 md:mt-0 text-right">
                     <div className="inline-flex items-center bg-indigo-50 px-3 py-1 rounded-full text-sm text-indigo-700">
                       <BookOpen className="w-4 h-4 mr-1" />
-                      <span>{student.college.department}</span>
+                      <span>{student.college?.department || "-"}</span>
                     </div>
-                    <div className="text-sm text-gray-500 mt-1">Year: {student.college.year}</div>
+                    <div className="text-sm text-gray-500 mt-1">Year: {student.college?.year || "-"}</div>
+                  </div>
+                </div>
+                <div className="mt-3">
+                  <div className="flex flex-wrap gap-1">
+                    {student.skills?.slice(0, 5).map((skill, index) => (
+                      <span
+                        key={index}
+                        className={`text-xs px-2 py-1 rounded-full ${
+                          skill === skillFilter
+                            ? "bg-indigo-200 text-indigo-800"
+                            : "bg-gray-100 text-gray-700"
+                        }`}
+                      >
+                        <Code className="w-3 h-3 inline mr-1" />
+                        {skill}
+                      </span>
+                    ))}
+                    {student.skills?.length > 5 && (
+                      <span className="text-xs px-2 py-1 rounded-full bg-gray-100 text-gray-700">
+                        +{student.skills.length - 5} more
+                      </span>
+                    )}
                   </div>
                 </div>
               </Link>
